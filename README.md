@@ -114,7 +114,7 @@ Run the Vite development server locally:
 npm run dev
 ```
 
-The application will be available at `https://amrit-arya-portfolio.vercel.app/`.
+The application will be available at `http://localhost:5173`.
 
 ### 🏗️ Production Build
 
