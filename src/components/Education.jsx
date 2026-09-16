@@ -7,7 +7,7 @@ const educationData = [
     institution: 'ITER | SOA',
     year: '2024 - Present',
     description: 'Focused on data structures, algorithms, software engineering, and web development. Participated in hackathons and coding competitions.',
-    gpa: '8.55 / 10',
+    gpa: '8.28 / 10',
     color: 'from-lavender to-pink',
   },
   {
