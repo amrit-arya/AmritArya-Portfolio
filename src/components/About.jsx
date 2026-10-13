@@ -5,12 +5,13 @@ function AnimatedCounter({ target, suffix = '' }) {
   const ref = useRef(null)
 
   useEffect(() => {
+    let timer
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
           let start = 0
           const step = Math.ceil(target / 40)
-          const timer = setInterval(() => {
+          timer = setInterval(() => {
             start += step
             if (start >= target) {
               setCount(target)
@@ -25,7 +26,10 @@ function AnimatedCounter({ target, suffix = '' }) {
       { threshold: 0.5 }
     )
     if (ref.current) observer.observe(ref.current)
-    return () => observer.disconnect()
+    return () => {
+      observer.disconnect()
+      if (timer) clearInterval(timer)
+    }
   }, [target])
 
   return (

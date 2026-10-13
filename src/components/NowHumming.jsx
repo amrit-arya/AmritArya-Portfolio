@@ -5,7 +5,7 @@ import { Play, Pause } from 'lucide-react';
 // ==========================================
 // 🎵 USER CONFIGURATION: Update your songs here
 // ==========================================
-export const SONGS_CONFIG = [
+const SONGS_CONFIG = [
   {
     id: 1,
     title: 'Khat',
@@ -52,57 +52,7 @@ export default function NowHumming() {
   const [duration, setDuration] = useState(0);
 
   const audioRef = useRef(null);
-
-  // Initialize and handle global audio changes
-  useEffect(() => {
-    if (!audioRef.current) {
-      audioRef.current = new Audio();
-      audioRef.current.preload = 'none';
-    }
-
-    const audio = audioRef.current;
-
-    const setAudioData = () => setDuration(audio.duration);
-    const setAudioTime = () => setProgress(audio.currentTime);
-    const onEnded = () => handleNext(); // Auto-play next song on end
-    // Drive isPlaying from audio element events — fixes iOS Safari
-    const onPlay = () => setIsPlaying(true);
-    const onPause = () => setIsPlaying(false);
-
-    audio.addEventListener('loadeddata', setAudioData);
-    audio.addEventListener('timeupdate', setAudioTime);
-    audio.addEventListener('ended', onEnded);
-    audio.addEventListener('play', onPlay);
-    audio.addEventListener('pause', onPause);
-
-    return () => {
-      audio.removeEventListener('loadeddata', setAudioData);
-      audio.removeEventListener('timeupdate', setAudioTime);
-      audio.removeEventListener('ended', onEnded);
-      audio.removeEventListener('play', onPlay);
-      audio.removeEventListener('pause', onPause);
-      audio.pause();
-    };
-  }, []);
-
-  // Sync audio source when active index changes
-  // Sync audio source when active index changes
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.src = SONGS_CONFIG[activeIndex].audioSrc;
-      audioRef.current.load();
-    }
-  }, [activeIndex]);
-
-  // togglePlay — let audio events drive isPlaying state
-  const togglePlay = () => {
-    if (!audioRef.current) return;
-    if (audioRef.current.paused) {
-      audioRef.current.play().catch(() => {});
-    } else {
-      audioRef.current.pause();
-    }
-  };
+  const handleNextRef = useRef(null);
 
   const handleNext = useCallback(() => {
     setActiveIndex((prev) => {
@@ -127,6 +77,60 @@ export default function NowHumming() {
       return prevIndex;
     });
   }, [isPlaying]);
+
+  useEffect(() => {
+    handleNextRef.current = handleNext;
+  }, [handleNext]);
+
+  // Initialize and handle global audio changes
+  useEffect(() => {
+    if (!audioRef.current) {
+      audioRef.current = new Audio();
+      audioRef.current.preload = 'none';
+    }
+
+    const audio = audioRef.current;
+
+    const setAudioData = () => setDuration(audio.duration);
+    const setAudioTime = () => setProgress(audio.currentTime);
+    const onEnded = () => handleNextRef.current?.(); // Auto-play next song on end
+    // Drive isPlaying from audio element events — fixes iOS Safari
+    const onPlay = () => setIsPlaying(true);
+    const onPause = () => setIsPlaying(false);
+
+    audio.addEventListener('loadeddata', setAudioData);
+    audio.addEventListener('timeupdate', setAudioTime);
+    audio.addEventListener('ended', onEnded);
+    audio.addEventListener('play', onPlay);
+    audio.addEventListener('pause', onPause);
+
+    return () => {
+      audio.removeEventListener('loadeddata', setAudioData);
+      audio.removeEventListener('timeupdate', setAudioTime);
+      audio.removeEventListener('ended', onEnded);
+      audio.removeEventListener('play', onPlay);
+      audio.removeEventListener('pause', onPause);
+      audio.pause();
+    };
+  }, []);
+
+  // Sync audio source when active index changes
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.src = SONGS_CONFIG[activeIndex].audioSrc;
+      audioRef.current.load();
+    }
+  }, [activeIndex]);
+
+  // togglePlay — let audio events drive isPlaying state
+  const togglePlay = () => {
+    if (!audioRef.current) return;
+    if (audioRef.current.paused) {
+      audioRef.current.play().catch(() => {});
+    } else {
+      audioRef.current.pause();
+    }
+  };
 
   // Format time (seconds to mm:ss)
   const formatTime = (time) => {
@@ -179,14 +183,12 @@ export default function NowHumming() {
         {/* Header */}
         <div className="text-center mb-16 animate-fade-in-up">
           <span
-            className="text-sm font-semibold tracking-widest uppercase text-white/70 mb-2 block"
-            style={{ fontFamily: 'Herkey, sans-serif' }}
+            className="text-sm font-semibold tracking-widest uppercase text-white/70 mb-2 block font-body"
           >
             What I listen to
           </span>
           <h2
-            className="text-5xl sm:text-6xl font-bold mt-3 text-white drop-shadow-lg"
-            style={{ fontFamily: 'Monograph, sans-serif' }}
+            className="text-5xl sm:text-6xl font-bold mt-3 text-white drop-shadow-lg font-heading"
           >
             Now Humming&nbsp;.....
           </h2>
@@ -268,7 +270,7 @@ export default function NowHumming() {
                 {/* Song Info & Waveform */}
                 <div className="w-full text-center flex flex-col items-center mb-6">
                   <div className="flex items-center gap-3 mb-1">
-                    <h3 className="text-2xl font-bold text-white tracking-wide" style={{ fontFamily: 'Monograph, sans-serif' }}>
+                    <h3 className="text-2xl font-bold text-white tracking-wide font-heading">
                       {song.title}
                     </h3>
 
@@ -286,7 +288,7 @@ export default function NowHumming() {
                     )}
                   </div>
 
-                  <p className="text-[15px] text-white/70 tracking-widen" style={{ fontFamily: 'Herkey, sans-serif' }}>
+                  <p className="text-[15px] text-white/70 tracking-wider font-body">
                     {song.artist}
                   </p>
                 </div>

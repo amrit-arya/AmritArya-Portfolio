@@ -196,24 +196,15 @@ export default function Skills() {
       )}
 
       <div className="max-w-6xl mx-auto bento-section" ref={gridRef}>
-        <div style={{
-           '--glow-x': '50%',
-           '--glow-y': '50%',
-           '--glow-intensity': '0',
-           '--glow-radius': '200px'
-        }}></div>
         {/* Header */}
         <div className={`text-center mb-20 ${isVisible ? 'animate-fade-in-up' : 'scroll-hidden'}`}>
-          <span className="text-sm font-semibold tracking-widest uppercase text-white/60"
-            style={{ fontFamily: 'Herkey, sans-serif' }}>
+          <span className="text-sm font-semibold tracking-widest uppercase text-white/60 font-body">
             What I do
           </span>
-          <h2 className="text-4xl sm:text-5xl font-bold mt-3 text-white"
-            style={{ fontFamily: 'Monograph, sans-serif' }}>
+          <h2 className="text-4xl sm:text-5xl font-bold mt-3 text-white font-heading">
             Skills & Expertise
           </h2>
-          <p className="mt-4 text-white/60 max-w-xl mx-auto"
-            style={{ fontFamily: 'Herkey, sans-serif' }}>
+          <p className="mt-4 text-white/60 max-w-xl mx-auto font-body">
             Technologies and tools I use to bring products to life.
           </p>
         </div>
@@ -235,8 +226,7 @@ export default function Skills() {
             clickEffect={true}
             disableAnimations={false}
           >
-            <h3 className="text-lg font-bold text-white mb-2 self-start"
-              style={{ fontFamily: 'Monograph, sans-serif', letterSpacing: '0.05em' }}>
+            <h3 className="text-lg font-bold text-white mb-2 self-start font-heading tracking-wider">
               Skill Radar
             </h3>
             <RadarChart data={radarData} size={300} />
@@ -258,15 +248,13 @@ export default function Skills() {
                 clickEffect={true}
               >
                 <div style={{ animationDelay: `${0.1 * i + 0.3}s` }}>
-                  <p className="text-xs tracking-widest uppercase text-white/50 mb-4 font-bold"
-                    style={{ fontFamily: 'Herkey, sans-serif' }}>
+                  <p className="text-xs tracking-widest uppercase text-white/50 mb-4 font-bold font-body">
                     {stack.category}
                   </p>
                   <div className="flex flex-wrap gap-2 relative z-10">
                     {stack.items.map((item) => (
                       <span key={item}
-                        className="px-3 py-1.5 rounded-lg text-[11px] text-white/80 bg-white/10 hover:bg-white/20 hover:text-white transition-all pointer-events-auto z-20"
-                        style={{ fontFamily: 'Herkey, sans-serif' }}>
+                        className="px-3 py-1.5 rounded-lg text-[11px] text-white/80 bg-white/10 hover:bg-white/20 hover:text-white transition-all pointer-events-auto z-20 font-body">
                         {item}
                       </span>
                     ))}

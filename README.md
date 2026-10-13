@@ -16,11 +16,11 @@ This project was built following premium web design guidelines to create an inte
     *   *Particle Emitter*: Custom physical-like particles generated on hover.
     *   *Ripple Effect*: Click ripples emitting from cursor position.
     *   *Cursor Spotlight*: Global cursor light tracking overlay adjusting border and card illumination on the fly.
-*   **🎯 Velocity-Sensitive Cursor**: A custom pointer (`SmoothCursor.jsx`) that tracks mouse movements, automatically rotating to align with motion velocity vectors and scaling down on acceleration using spring physics.
+*   **🎯 Velocity-Sensitive Cursor**: A custom pointer (`SmoothCursor` in `smooth-cursor.jsx`) that tracks mouse movements, automatically rotating to align with motion velocity vectors and scaling down on acceleration using spring physics.
 *   **🎵 Now Humming Music Player**: A retro 3D spinning vinyl carousel player (`NowHumming.jsx`) using `framer-motion` 3D perspective transforms. Features:
     *   Automatic turntable animation during playback.
     *   Interactive swipe/drag gesture carousel tracking.
-    *   Real-time custom HTML5 Audio progress bar tracking & scrubbing.
+    *   Real-time custom HTML5 Audio progress bar tracking & scrubbing with keyboard navigation.
     *   Active track wave bounce visualization.
 *   **📊 Interactive SVG Radar Chart**: Custom-calculated skill matrix visualization (`RadarChart` inside `Skills.jsx`) with hover tooltips displaying subject mastery levels.
 
@@ -30,10 +30,10 @@ This project was built following premium web design guidelines to create an inte
 
 *   **Core**: React 19, JavaScript (ES6+), HTML5, CSS3
 *   **Build System & Tooling**: Vite 7
-*   **Styling**: Tailwind CSS v4, Custom CSS classes (`index.css`)
+*   **Styling**: Tailwind CSS v4, Custom CSS tokens (`index.css`)
 *   **Animation**: GSAP (GreenSock), Framer Motion, CSS Keyframes
-*   **Icons**: Lucide React
-*   **API & Serverless**: Web3Forms for Contact Form submissions
+*   **Icons**: Lucide React & Handcrafted SVGs
+*   **API & Serverless**: Web3Forms for Contact Form submissions with bot protection
 
 ---
 
@@ -41,38 +41,42 @@ This project was built following premium web design guidelines to create an inte
 
 ```bash
 Amrit-Portfolio/
-├── .env.example            # Environment variables example
-├── index.html              # Entry HTML file
+├── .env.example            # Environment variables template
+├── index.html              # Entry HTML file with SEO metadata
 ├── package.json            # Configuration and dependencies
+├── vercel.json             # Security headers configuration
 ├── vite.config.js          # Vite config with path aliases
+├── public/                 # Static assets, self-hosted fonts, audio, images
+│   ├── favicon.svg         # SVG vector favicon
+│   ├── robots.txt          # Search engine crawler instructions
+│   └── sitemap.xml         # XML Sitemap
 └── src/
-    ├── App.jsx             # Main layout & section router
-    ├── ThemeContext.jsx    # Site-wide styling and themes
+    ├── App.jsx             # Main layout, error boundary & section composition
     ├── main.jsx            # React root mount point
-    ├── index.css           # Global custom classes, keyframes, cursors, & fonts
-    ├── components/
-    │   ├── Hero.jsx        # Landing section with multi-lingual greeting cycle
-    │   ├── About.jsx       # Biography, custom stats count animation, badges
-    │   ├── Education.jsx   # Interactive vertical timeline layout
-    │   ├── Projects.jsx    # Projects display grid (Cyber Sentinel, Virasat, VOX, etc.)
-    │   ├── Skills.jsx      # Skills grid & custom SVG Radar Chart integration
-    │   ├── NowHumming.jsx  # Retro spinning vinyl media carousel and player
-    │   ├── Contact.jsx     # Contact form connected to Web3Forms API
-    │   ├── Footer.jsx      # Social profiles links & licensing details
-    │   ├── Silk.jsx        # WebGL fluid shader background canvas
-    │   ├── LoadingScreen.jsx# Initial SVG handwriting drawing page
-    │   └── ui/
-    │       ├── button.jsx  # Customized UI action component
-    │       ├── GradientBarsBG.jsx # Vertical bar graphics for loading screens
-    │       └── smooth-cursor.jsx  # Spring-velocity tracking custom cursor
-    └── utils/              # Helper utilities
+    ├── index.css           # Design tokens, typography, custom utilities
+    ├── lib/
+    │   └── utils.js        # Class merging utilities (clsx + twMerge)
+    └── components/
+        ├── Hero.jsx        # Landing section with multi-lingual greeting cycle
+        ├── About.jsx       # Biography, animated stats counter, tech badges
+        ├── Education.jsx   # Interactive vertical timeline layout
+        ├── Projects.jsx    # Projects grid (GASMIND, Cyber Sentinel, Virasat, VOX, etc.)
+        ├── Skills.jsx      # Skills grid & custom SVG Radar Chart integration
+        ├── NowHumming.jsx  # Retro spinning vinyl media carousel and player
+        ├── Contact.jsx     # Contact form connected to Web3Forms API
+        ├── Footer.jsx      # Social profiles links & licensing details
+        ├── MarqueeStrip.jsx# Animated technology marquee banner
+        ├── Silk.jsx        # WebGL fluid shader background canvas
+        ├── MagicBento.jsx  # Particle cards & spotlight effects
+        └── ui/
+            └── smooth-cursor.jsx # Spring-velocity tracking custom cursor
 ```
 
 ---
 
 ## ⚙️ Configuration & Environment Setup
 
-The contact form is powered by [Web3Forms](https://web3forms.com/), requiring a free access token to receive email submissions.
+The contact form is powered by [Web3Forms](https://web3forms.com/), requiring an access token to receive email submissions.
 
 1.  Copy `.env.example` to a new file named `.env`:
     ```bash
@@ -136,15 +140,16 @@ npm run preview
 
 ---
 
-## 🚀 Showcase Projects Details
+## 🚀 Featured Projects
 
-1.  **Cyber Sentinel**: Full-stack CCTV Security Scanning Platform featuring encrypted RTSP feed scanning, camera administration, threat logs, and a React-based monitoring dashboard.
-2.  **Virasat**: A secure digital legacy vault enabling users to encrypt, store, and transfer sensitive documents and credentials to designated beneficiaries.
-3.  **VOX**: End-to-end computer-vision system converting sign language gestures into text/speech in real-time using OpenCV, Mediapipe, and TensorFlow.
-4.  **Railway Management System**: System joining Python and MySQL backend to manage railway ticketing, schedules, and routing.
+1.  **GASMIND**: An intelligent by-product gas management platform for real-time generation, consumption, gas balance monitoring, and what-if impact simulation.
+2.  **Cyber Sentinel**: Full-stack CCTV Security Scanning Platform featuring encrypted RTSP feed scanning, camera administration, threat logs, and a React-based monitoring dashboard.
+3.  **Virasat**: A secure digital legacy vault enabling users to encrypt, store, and transfer sensitive documents and credentials to designated beneficiaries.
+4.  **VOX**: End-to-end computer-vision system converting sign language gestures into text/speech in real-time using OpenCV, Mediapipe, and TensorFlow.
+5.  **Railway Management System**: A centralized railway reservation and operations management system designed with automated seat allocation, scheduling, and MySQL transactional data storage.
 
 ---
 
 ## 🛡️ License
 
-This project is licensed under the **ISC License**. Feel free to use it to inspire your own portfolio designs!
+This project is licensed under the **ISC License**.

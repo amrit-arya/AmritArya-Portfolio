@@ -1,5 +1,4 @@
-import { Component, useState, lazy, Suspense } from 'react'
-import { ThemeProvider } from './ThemeContext'
+import { Component, lazy, Suspense } from 'react'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import About from './components/About'
@@ -10,8 +9,6 @@ import Footer from './components/Footer'
 import MarqueeStrip from './components/MarqueeStrip'
 import Silk from './components/Silk'
 import { SmoothCursor } from "@/components/ui/smooth-cursor"
-import LoadingScreen from './components/LoadingScreen'
-import { AnimatePresence } from 'framer-motion'
 
 // Lazy-load heavier below-the-fold components to reduce initial JS chunk size
 const Skills = lazy(() => import('./components/Skills'))
@@ -50,46 +47,38 @@ class ErrorBoundary extends Component {
 }
 
 export default function App() {
-  const [isLoading, setIsLoading] = useState(false)
-
   return (
     <ErrorBoundary>
-      <ThemeProvider>
-        <AnimatePresence mode="wait">
-          {isLoading && <LoadingScreen onComplete={() => setIsLoading(false)} />}
-        </AnimatePresence>
+      <SmoothCursor />
+      {/* Silk WebGL background — fixed, behind everything */}
+      <Silk
+        color="#4d2169"
+        speed={1}
+        scale={1.2}
+        noiseIntensity={0.6}
+        rotation={0}
+      />
 
-        <SmoothCursor />
-        {/* Silk WebGL background — fixed, behind everything */}
-        <Silk
-          color="#4d2169"
-          speed={1}
-          scale={1.2}
-          noiseIntensity={0.6}
-          rotation={0}
-        />
+      {/* Page content */}
+      <div style={{ position: 'relative', zIndex: 1, minHeight: '100dvh' }}>
+        <Navbar />
 
-        {/* Page content */}
-        <div style={{ position: 'relative', zIndex: 1, minHeight: '100dvh' }}>
-          <Navbar />
-
-          <main>
-            <Hero />
-            <MarqueeStrip />
-            <About />
-            <Education />
-            <Projects />
-            <Suspense fallback={<div className="min-h-[400px] flex items-center justify-center text-white/40">Loading skills...</div>}>
-              <Skills />
-            </Suspense>
-            <Suspense fallback={<div className="min-h-[400px] flex items-center justify-center text-white/40">Loading player...</div>}>
-              <NowHumming />
-            </Suspense>
-            <Contact />
-          </main>
-          <Footer />
-        </div>
-      </ThemeProvider>
+        <main>
+          <Hero />
+          <MarqueeStrip />
+          <About />
+          <Education />
+          <Projects />
+          <Suspense fallback={<div className="min-h-[400px] flex items-center justify-center text-white/40">Loading skills...</div>}>
+            <Skills />
+          </Suspense>
+          <Suspense fallback={<div className="min-h-[400px] flex items-center justify-center text-white/40">Loading player...</div>}>
+            <NowHumming />
+          </Suspense>
+          <Contact />
+        </main>
+        <Footer />
+      </div>
     </ErrorBoundary>
   )
 }

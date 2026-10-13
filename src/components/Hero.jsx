@@ -22,8 +22,6 @@ export default function Hero() {
   useEffect(() => {
     // Respect prefers-reduced-motion: stay static on index 0
     if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setIndex(0)
-      setPhase('visible')
       return
     }
 
