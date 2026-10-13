@@ -57,6 +57,7 @@ export default function NowHumming() {
   useEffect(() => {
     if (!audioRef.current) {
       audioRef.current = new Audio();
+      audioRef.current.preload = 'none';
     }
 
     const audio = audioRef.current;
@@ -64,47 +65,68 @@ export default function NowHumming() {
     const setAudioData = () => setDuration(audio.duration);
     const setAudioTime = () => setProgress(audio.currentTime);
     const onEnded = () => handleNext(); // Auto-play next song on end
+    // Drive isPlaying from audio element events — fixes iOS Safari
+    const onPlay = () => setIsPlaying(true);
+    const onPause = () => setIsPlaying(false);
 
     audio.addEventListener('loadeddata', setAudioData);
     audio.addEventListener('timeupdate', setAudioTime);
     audio.addEventListener('ended', onEnded);
+    audio.addEventListener('play', onPlay);
+    audio.addEventListener('pause', onPause);
 
     return () => {
       audio.removeEventListener('loadeddata', setAudioData);
       audio.removeEventListener('timeupdate', setAudioTime);
       audio.removeEventListener('ended', onEnded);
+      audio.removeEventListener('play', onPlay);
+      audio.removeEventListener('pause', onPause);
       audio.pause();
     };
   }, []);
 
   // Sync audio source when active index changes
+  // Sync audio source when active index changes
   useEffect(() => {
     if (audioRef.current) {
-      const wasPlaying = isPlaying;
       audioRef.current.src = SONGS_CONFIG[activeIndex].audioSrc;
       audioRef.current.load();
-      if (wasPlaying) {
-        audioRef.current.play().catch(e => console.log('Auto-play prevented:', e));
-      }
     }
   }, [activeIndex]);
 
+  // togglePlay — let audio events drive isPlaying state
   const togglePlay = () => {
-    if (isPlaying) {
-      audioRef.current.pause();
+    if (!audioRef.current) return;
+    if (audioRef.current.paused) {
+      audioRef.current.play().catch(() => {});
     } else {
-      audioRef.current.play().catch(e => console.log('Play prevented:', e));
+      audioRef.current.pause();
     }
-    setIsPlaying(!isPlaying);
   };
 
   const handleNext = useCallback(() => {
-    setActiveIndex((prev) => (prev + 1) % SONGS_CONFIG.length);
-  }, []);
+    setActiveIndex((prev) => {
+      const nextIndex = (prev + 1) % SONGS_CONFIG.length;
+      if (audioRef.current && isPlaying) {
+        audioRef.current.src = SONGS_CONFIG[nextIndex].audioSrc;
+        audioRef.current.load();
+        audioRef.current.play().catch(() => {});
+      }
+      return nextIndex;
+    });
+  }, [isPlaying]);
 
   const handlePrev = useCallback(() => {
-    setActiveIndex((prev) => (prev - 1 + SONGS_CONFIG.length) % SONGS_CONFIG.length);
-  }, []);
+    setActiveIndex((prev) => {
+      const prevIndex = (prev - 1 + SONGS_CONFIG.length) % SONGS_CONFIG.length;
+      if (audioRef.current && isPlaying) {
+        audioRef.current.src = SONGS_CONFIG[prevIndex].audioSrc;
+        audioRef.current.load();
+        audioRef.current.play().catch(() => {});
+      }
+      return prevIndex;
+    });
+  }, [isPlaying]);
 
   // Format time (seconds to mm:ss)
   const formatTime = (time) => {
@@ -150,7 +172,7 @@ export default function NowHumming() {
     <section
       id="now-humming"
       // Inherits the dark site background natively
-      className="relative min-h-screen py-32 px-6 flex flex-col justify-center overflow-hidden bg-transparent"
+      className="relative min-h-[100dvh] min-h-svh py-32 px-6 flex flex-col justify-center overflow-hidden bg-transparent"
     >
       <div className="max-w-6xl mx-auto w-full z-10">
 
@@ -191,10 +213,29 @@ export default function NowHumming() {
                 dragConstraints={{ left: 0, right: 0 }}
                 dragElastic={0.8}
                 onDragEnd={handleDragEnd}
+                role={isActive ? undefined : "button"}
+                tabIndex={isActive ? undefined : 0}
+                aria-label={isActive ? undefined : `Select track ${song.title} by ${song.artist}`}
+                onKeyDown={(e) => {
+                  if (!isActive && (e.key === 'Enter' || e.key === ' ')) {
+                    e.preventDefault();
+                    setActiveIndex(i);
+                    if (audioRef.current) {
+                      audioRef.current.src = SONGS_CONFIG[i].audioSrc;
+                      audioRef.current.load();
+                      audioRef.current.play().catch(() => {});
+                    }
+                  }
+                }}
                 onClick={() => {
                   if (!isActive) {
                     setActiveIndex(i);
-                    setIsPlaying(true);
+                    // Play directly in tap handler for iOS Safari compatibility
+                    if (audioRef.current) {
+                      audioRef.current.src = SONGS_CONFIG[i].audioSrc;
+                      audioRef.current.load();
+                      audioRef.current.play().catch(() => {});
+                    }
                   }
                 }}
               >
@@ -250,23 +291,41 @@ export default function NowHumming() {
                   </p>
                 </div>
 
-                {/* Progress Bar Container - ONLY interactive if card is active */}
+                {/* Progress Bar Container - Accessible Slider */}
                 <div className={`w-full mb-8 ${isActive ? 'opacity-100' : 'opacity-40 pointer-events-none'}`}>
-                  <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden mb-2 shadow-inner"
-                    style={{ cursor: isActive ? 'pointer' : 'default' }}
+                  <div
+                    role="slider"
+                    tabIndex={isActive ? 0 : -1}
+                    aria-label="Seek track position"
+                    aria-valuemin={0}
+                    aria-valuemax={Math.round(duration || 0)}
+                    aria-valuenow={Math.round(progress || 0)}
+                    aria-valuetext={`${formatTime(progress)} of ${formatTime(duration)}`}
+                    className="py-3 -my-3 cursor-pointer group"
+                    onKeyDown={(e) => {
+                      if (!isActive || !audioRef.current) return;
+                      if (e.key === 'ArrowRight') {
+                        audioRef.current.currentTime = Math.min(duration, audioRef.current.currentTime + 5);
+                      } else if (e.key === 'ArrowLeft') {
+                        audioRef.current.currentTime = Math.max(0, audioRef.current.currentTime - 5);
+                      }
+                    }}
                     onClick={(e) => {
                       if (!isActive || !audioRef.current) return;
                       const rect = e.currentTarget.getBoundingClientRect();
                       const pos = (e.clientX - rect.left) / rect.width;
                       audioRef.current.currentTime = pos * duration;
-                    }}>
-                    <div
-                      className="h-full bg-white rounded-full transition-all duration-100 shadow-[0_0_10px_rgba(255,255,255,0.5)]"
-                      style={{ width: `${(isActive ? (progress / duration) * 100 : 0) || 0}%` }}
-                    />
+                    }}
+                  >
+                    <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden shadow-inner">
+                      <div
+                        className="h-full bg-white rounded-full transition-all duration-100 shadow-[0_0_10px_rgba(255,255,255,0.5)]"
+                        style={{ width: `${(isActive ? (progress / duration) * 100 : 0) || 0}%` }}
+                      />
+                    </div>
                   </div>
 
-                  <div className="flex justify-between text-[11px] text-white/70 font-mono tracking-wider">
+                  <div className="flex justify-between text-[11px] text-white/70 font-mono tracking-wider mt-2">
                     <span>{isActive ? formatTime(progress) : '0:00'}</span>
                     <span>{isActive ? formatTime(duration) : '0:00'}</span>
                   </div>
@@ -277,7 +336,7 @@ export default function NowHumming() {
                   <button
                     onClick={(e) => { e.stopPropagation(); togglePlay(); }}
                     aria-label={isPlaying ? "Pause music" : "Play music"}
-                    className="w-16 h-16 flex items-center justify-center rounded-full bg-white text-black hover:scale-105 transition-transform duration-300 shadow-[0_5px_20px_rgba(255,255,255,0.2)]"
+                    className="w-16 h-16 flex items-center justify-center rounded-full bg-white text-black hover:scale-105 transition-transform duration-300 shadow-[0_5px_20px_rgba(255,255,255,0.2)] cursor-pointer"
                   >
                     {isPlaying ?
                       <Pause size={28} className="fill-current" /> :

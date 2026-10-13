@@ -1,37 +1,47 @@
-import { Component, useState } from 'react'
+import { Component, useState, lazy, Suspense } from 'react'
 import { ThemeProvider } from './ThemeContext'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import About from './components/About'
 import Education from './components/Education'
 import Projects from './components/Projects'
-import Skills from './components/Skills'
 import Contact from './components/Contact'
 import Footer from './components/Footer'
 import MarqueeStrip from './components/MarqueeStrip'
-import NowHumming from './components/NowHumming'
-
 import Silk from './components/Silk'
 import { SmoothCursor } from "@/components/ui/smooth-cursor"
 import LoadingScreen from './components/LoadingScreen'
 import { AnimatePresence } from 'framer-motion'
 
+// Lazy-load heavier below-the-fold components to reduce initial JS chunk size
+const Skills = lazy(() => import('./components/Skills'))
+const NowHumming = lazy(() => import('./components/NowHumming'))
+
 class ErrorBoundary extends Component {
   constructor(props) {
     super(props)
-    this.state = { hasError: false, error: null }
+    this.state = { hasError: false }
   }
-  static getDerivedStateFromError(error) {
-    return { hasError: true, error }
+  static getDerivedStateFromError() {
+    return { hasError: true }
+  }
+  componentDidCatch(error, errorInfo) {
+    console.error('Portfolio application caught error:', error, errorInfo)
   }
   render() {
     if (this.state.hasError) {
       return (
-        <div style={{ background: '#0a0a0a', color: '#fff', padding: '2rem', fontFamily: 'monospace', minHeight: '100vh' }}>
-          <h2 style={{ color: '#ff6b6b' }}>Something crashed:</h2>
-          <pre style={{ color: '#aaa', fontSize: '13px', whiteSpace: 'pre-wrap' }}>
-            {this.state.error?.toString()}
-          </pre>
+        <div style={{ background: '#0a0a0a', color: '#fff', padding: '2rem', minHeight: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+          <h2 style={{ fontSize: '1.75rem', fontWeight: 'bold', marginBottom: '1rem', color: '#ffffff' }}>Something went wrong</h2>
+          <p style={{ color: 'rgba(255, 255, 255, 0.7)', maxWidth: '420px', marginBottom: '1.5rem', lineHeight: '1.6' }}>
+            An unexpected error occurred while rendering this page. Please refresh to try again.
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            style={{ padding: '0.75rem 2rem', borderRadius: '0.75rem', background: '#ffffff', color: '#000000', fontWeight: 'bold', cursor: 'pointer', border: 'none' }}
+          >
+            Reload Page
+          </button>
         </div>
       )
     }
@@ -60,7 +70,7 @@ export default function App() {
         />
 
         {/* Page content */}
-        <div style={{ position: 'relative', zIndex: 1, minHeight: '100vh' }}>
+        <div style={{ position: 'relative', zIndex: 1, minHeight: '100dvh' }}>
           <Navbar />
 
           <main>
@@ -69,8 +79,12 @@ export default function App() {
             <About />
             <Education />
             <Projects />
-            <Skills />
-            <NowHumming />
+            <Suspense fallback={<div className="min-h-[400px] flex items-center justify-center text-white/40">Loading skills...</div>}>
+              <Skills />
+            </Suspense>
+            <Suspense fallback={<div className="min-h-[400px] flex items-center justify-center text-white/40">Loading player...</div>}>
+              <NowHumming />
+            </Suspense>
             <Contact />
           </main>
           <Footer />

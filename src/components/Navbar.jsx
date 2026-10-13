@@ -31,7 +31,7 @@ export default function Navbar() {
         ([entry]) => {
           if (entry.isIntersecting) setActiveSection(id)
         },
-        { threshold: 0.35 }
+        { threshold: 0, rootMargin: '-40% 0px -60% 0px' }
       )
       observer.observe(el)
       observers.push(observer)
@@ -44,6 +44,26 @@ export default function Navbar() {
     if (el) el.scrollIntoView({ behavior: 'smooth' })
     setIsOpen(false)
   }
+
+  // Handle escape key and outside click to close mobile menu
+  useEffect(() => {
+    if (!isOpen) return
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') setIsOpen(false)
+    }
+    const handleClickOutside = (e) => {
+      const nav = document.getElementById('main-navbar')
+      if (nav && !nav.contains(e.target)) {
+        setIsOpen(false)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    document.addEventListener('pointerdown', handleClickOutside)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      document.removeEventListener('pointerdown', handleClickOutside)
+    }
+  }, [isOpen])
 
   return (
     <nav
@@ -101,12 +121,13 @@ export default function Navbar() {
           </a>
         </div>
 
-        {/* Mobile: Hamburger only (theme toggle removed) */}
         <div className="md:hidden flex items-center gap-2">
           <button
             onClick={() => setIsOpen(!isOpen)}
             className="relative w-10 h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer text-white/80 hover:text-white hover:bg-white/5"
-            aria-label="Toggle menu"
+            aria-label={isOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={isOpen}
+            aria-controls="mobile-nav-menu"
           >
             <div className="flex flex-col gap-1.5 items-center">
               <span className={`block w-5 h-0.5 bg-current transition-all duration-300 ${isOpen ? 'rotate-45 translate-y-2' : ''}`} />
@@ -119,14 +140,17 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       <div
+        id="mobile-nav-menu"
         className={`md:hidden absolute top-full left-0 right-0 mt-2 rounded-2xl glass overflow-hidden transition-all duration-400 ${isOpen ? 'max-h-96 opacity-100 shadow-xl shadow-white/5' : 'max-h-0 opacity-0'
           }`}
+        onKeyDown={(e) => { if (e.key === 'Escape') setIsOpen(false) }}
       >
         <div className="p-4 flex flex-col gap-1">
           {navLinks.map(({ id, label }) => (
             <button
               key={id}
               onClick={() => scrollTo(id)}
+              tabIndex={isOpen ? 0 : -1}
               className={`px-4 py-3 rounded-xl text-left text-sm font-medium transition-all duration-300 cursor-pointer ${activeSection === id
                   ? 'text-white bg-white/10'
                   : 'text-white/70 hover:text-white hover:bg-white/5'
@@ -137,6 +161,7 @@ export default function Navbar() {
           ))}
           <a
             href="#contact"
+            tabIndex={isOpen ? 0 : -1}
             className="mt-2 px-4 py-3 rounded-xl bg-white text-black text-sm font-semibold text-center transition-all hover:shadow-lg"
           >
             Let's Talk

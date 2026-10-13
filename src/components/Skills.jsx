@@ -25,7 +25,7 @@ function RadarChart({ data, size = 320 }) {
   const cx = size / 2
   const cy = size / 2
   const levels = 5
-  const maxR = size * 0.36
+  const maxR = size * 0.32
   const n = data.length
 
   const angleFor = (i) => (Math.PI * 2 * i) / n - Math.PI / 2
@@ -37,7 +37,7 @@ function RadarChart({ data, size = 320 }) {
   }
 
   const labelAt = (i) => {
-    const r = maxR + 26
+    const r = maxR + 24
     const a = angleFor(i)
     return { x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) }
   }
@@ -63,85 +63,102 @@ function RadarChart({ data, size = 320 }) {
   })
 
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox={`0 0 ${size} ${size}`}
-      style={{ overflow: 'visible', display: 'block', margin: '0 auto' }}
-    >
-      {/* Grid rings */}
-      {rings.map((d, i) => (
-        <path key={i} d={d} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
-      ))}
+    <div className="w-full flex flex-col items-center">
+      <svg
+        width="100%"
+        height="100%"
+        viewBox="-25 -20 370 360"
+        role="img"
+        aria-label={`Skill radar chart: ${data.map(d => `${d.subject} ${d.score}%`).join(', ')}`}
+        style={{ overflow: 'visible', display: 'block', maxWidth: '340px', margin: '0 auto' }}
+      >
+        {/* Grid rings */}
+        {rings.map((d, i) => (
+          <path key={i} d={d} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
+        ))}
 
-      {/* Axis lines */}
-      {axes.map((a, i) => (
-        <line key={i} x1={a.x1} y1={a.y1} x2={a.x2} y2={a.y2}
-          stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
-      ))}
+        {/* Axis lines */}
+        {axes.map((a, i) => (
+          <line key={i} x1={a.x1} y1={a.y1} x2={a.x2} y2={a.y2}
+            stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
+        ))}
 
-      {/* Data polygon fill */}
-      <path d={polyPath} fill="rgba(255,255,255,0.08)" stroke="none" />
+        {/* Data polygon fill */}
+        <path d={polyPath} fill="rgba(255,255,255,0.08)" stroke="none" />
 
-      {/* Data polygon stroke */}
-      <path d={polyPath} fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="1.8"
-        strokeLinejoin="round" />
+        {/* Data polygon stroke */}
+        <path d={polyPath} fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="1.8"
+          strokeLinejoin="round" />
 
-      {/* Dots */}
-      {dataPoints.map((p, i) => (
-        <circle
-          key={i}
-          cx={p.x} cy={p.y} r={hovered === i ? 6 : 4}
-          fill={hovered === i ? '#ffffff' : 'rgba(255,255,255,0.6)'}
-          stroke="rgba(255,255,255,0.3)"
-          strokeWidth="1.5"
-          style={{ cursor: 'pointer', transition: 'r 0.15s, fill 0.15s' }}
-          onMouseEnter={() => setHovered(i)}
-          onMouseLeave={() => setHovered(null)}
-        />
-      ))}
+        {/* Dots */}
+        {dataPoints.map((p, i) => (
+          <circle
+            key={i}
+            cx={p.x} cy={p.y} r={hovered === i ? 7 : 5}
+            fill={hovered === i ? '#ffffff' : 'rgba(255,255,255,0.7)'}
+            stroke="rgba(255,255,255,0.4)"
+            strokeWidth="1.5"
+            tabIndex={0}
+            role="button"
+            aria-label={`${data[i].subject}: ${data[i].score}%`}
+            style={{ cursor: 'pointer', transition: 'r 0.15s, fill 0.15s' }}
+            onMouseEnter={() => setHovered(i)}
+            onMouseLeave={() => setHovered(null)}
+            onClick={() => setHovered(hovered === i ? null : i)}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setHovered(hovered === i ? null : i); }}
+          />
+        ))}
 
-      {/* Tooltip bubble on hover */}
-      {hovered !== null && (() => {
-        const p = dataPoints[hovered]
-        const d = data[hovered]
-        const bw = 80, bh = 38, br = 8
-        let bx = p.x - bw / 2
-        let by = p.y - bh - 12
-        if (by < 4) by = p.y + 14
-        bx = Math.max(4, Math.min(size - bw - 4, bx))
-        return (
-          <g>
-            <rect x={bx} y={by} width={bw} height={bh} rx={br}
-              fill="rgba(8,8,18,0.95)" stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
-            <text x={bx + bw / 2} y={by + 14} textAnchor="middle"
-              fill="rgba(255,255,255,0.45)" fontSize="9"
-              style={{ fontFamily: 'Herkey, sans-serif', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+        {/* Tooltip bubble on hover */}
+        {hovered !== null && (() => {
+          const p = dataPoints[hovered]
+          const d = data[hovered]
+          const bw = 84, bh = 40, br = 8
+          let bx = p.x - bw / 2
+          let by = p.y - bh - 12
+          if (by < 4) by = p.y + 14
+          bx = Math.max(0, Math.min(size - bw, bx))
+          return (
+            <g>
+              <rect x={bx} y={by} width={bw} height={bh} rx={br}
+                fill="rgba(8,8,18,0.95)" stroke="rgba(255,255,255,0.25)" strokeWidth="1" />
+              <text x={bx + bw / 2} y={by + 14} textAnchor="middle"
+                fill="rgba(255,255,255,0.7)" fontSize="10"
+                style={{ fontFamily: 'Herkey, sans-serif', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                {d.subject}
+              </text>
+              <text x={bx + bw / 2} y={by + 31} textAnchor="middle"
+                fill="#ffffff" fontSize="14" fontWeight="bold"
+                style={{ fontFamily: 'Monograph, sans-serif' }}>
+                {d.score}%
+              </text>
+            </g>
+          )
+        })()}
+
+        {/* Labels */}
+        {data.map((d, i) => {
+          const lp = labelAt(i)
+          return (
+            <text key={i} x={lp.x} y={lp.y}
+              textAnchor="middle" dominantBaseline="middle"
+              fill={hovered === i ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.75)'}
+              fontSize="11"
+              style={{ fontFamily: 'Herkey, sans-serif', letterSpacing: '0.04em', transition: 'fill 0.15s' }}>
               {d.subject}
             </text>
-            <text x={bx + bw / 2} y={by + 30} textAnchor="middle"
-              fill="#ffffff" fontSize="14" fontWeight="bold"
-              style={{ fontFamily: 'Monograph, sans-serif' }}>
-              {d.score}%
-            </text>
-          </g>
-        )
-      })()}
-
-      {/* Labels */}
-      {data.map((d, i) => {
-        const lp = labelAt(i)
-        return (
-          <text key={i} x={lp.x} y={lp.y}
-            textAnchor="middle" dominantBaseline="middle"
-            fill={hovered === i ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.45)'}
-            fontSize="11"
-            style={{ fontFamily: 'Herkey, sans-serif', letterSpacing: '0.04em', transition: 'fill 0.15s' }}>
-            {d.subject}
-          </text>
-        )
-      })}
-    </svg>
+          )
+        })}
+      </svg>
+      {/* Mobile fallback pills for touch devices */}
+      <div className="flex sm:hidden flex-wrap gap-1.5 justify-center mt-3 max-w-xs">
+        {data.map((d) => (
+          <span key={d.subject} className="px-2 py-0.5 rounded text-[10px] bg-white/10 text-white/80 font-mono">
+            {d.subject}: <strong className="text-white">{d.score}%</strong>
+          </span>
+        ))}
+      </div>
+    </div>
   )
 }
 
@@ -152,7 +169,12 @@ export default function Skills() {
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      ([entry]) => setIsVisible(entry.isIntersecting),
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true)
+          observer.unobserve(entry.target)
+        }
+      },
       { threshold: 0.1 }
     )
     if (sectionRef.current) observer.observe(sectionRef.current)
@@ -182,7 +204,7 @@ export default function Skills() {
         }}></div>
         {/* Header */}
         <div className={`text-center mb-20 ${isVisible ? 'animate-fade-in-up' : 'scroll-hidden'}`}>
-          <span className="text-sm font-semibold tracking-widest uppercase text-white/40"
+          <span className="text-sm font-semibold tracking-widest uppercase text-white/60"
             style={{ fontFamily: 'Herkey, sans-serif' }}>
             What I do
           </span>
@@ -190,7 +212,7 @@ export default function Skills() {
             style={{ fontFamily: 'Monograph, sans-serif' }}>
             Skills & Expertise
           </h2>
-          <p className="mt-4 text-white/40 max-w-xl mx-auto"
+          <p className="mt-4 text-white/60 max-w-xl mx-auto"
             style={{ fontFamily: 'Herkey, sans-serif' }}>
             Technologies and tools I use to bring products to life.
           </p>
@@ -202,7 +224,7 @@ export default function Skills() {
 
           {/* Radar chart Inside Glow Card */}
           <ParticleCard 
-            className="card flex flex-col items-center justify-center glass-card rounded-[32px] p-8 border border-white/10 card--border-glow w-full pointer-events-auto h-[450px]"
+            className="card flex flex-col items-center justify-center glass-card rounded-[32px] p-4 sm:p-8 border border-white/10 card--border-glow w-full pointer-events-auto min-h-[460px] h-auto"
             style={{
               '--glow-intensity': '0',
               '--glow-radius': '300px'

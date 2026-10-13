@@ -48,7 +48,12 @@ export default function About() {
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      ([entry]) => setIsVisible(entry.isIntersecting),
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true)
+          observer.unobserve(entry.target)
+        }
+      },
       { threshold: 0.15 }
     )
     if (sectionRef.current) observer.observe(sectionRef.current)
@@ -78,18 +83,18 @@ export default function About() {
               A cloud enthusiast who loves building scalable software and watching
               <span className="text-pink"> containers behave.</span>
             </h3>
-            <div className="space-y-4 text-white/50 leading-relaxed">
+            <div className="space-y-4 text-white/75 leading-relaxed">
               <p>
-                I'm <strong className="text-white/70">Amrit Arya</strong>, a Computer Science undergraduate at ITER, Siksha 'O' Anusandhan University, with a strong interest in <strong className="text-white/70">DevOps, cloud computing, and building scalable software systems</strong>. I enjoy working at the intersection of development and operations, where automation, collaboration, and continuous improvement help turn ideas into reliable products.
+                I'm <strong className="text-white">Amrit Arya</strong>, a Computer Science undergraduate at ITER, Siksha 'O' Anusandhan University, with a strong interest in <strong className="text-white">DevOps, cloud computing, and building scalable software systems</strong>. I enjoy working at the intersection of development and operations, where automation, collaboration, and continuous improvement help turn ideas into reliable products.
               </p>
               <p>
-                My technical journey has involved building projects that combine <strong className="text-white/70">software development, machine learning, and security-focused systems</strong>. I developed <strong className="text-white/70">VOX</strong>, a real-time sign language–to–text translation system using computer vision to improve accessibility, and <strong className="text-white/70">Virasat</strong>, a secure digital legacy management platform designed to safely store and transfer sensitive data. I have also worked on <strong className="text-white/70">Cyber Sentinel</strong>, a cybersecurity monitoring dashboard that helps detect and visualize vulnerabilities in real time.
+                My technical journey has involved building projects that combine <strong className="text-white">software development, machine learning, and security-focused systems</strong>. I developed <strong className="text-white">VOX</strong>, a real-time sign language–to–text translation system using computer vision to improve accessibility, and <strong className="text-white">Virasat</strong>, a secure digital legacy management platform designed to safely store and transfer sensitive data. I have also worked on <strong className="text-white">Cyber Sentinel</strong>, a cybersecurity monitoring dashboard that helps detect and visualize vulnerabilities in real time.
               </p>
               <p>
-                Alongside technical projects, I actively contribute to tech communities as a <strong className="text-white/70">Core Media Team Member at Google Developers Group</strong>.
+                Alongside technical projects, I actively contribute to tech communities as a <strong className="text-white">Core Media Team Member at Google Developers Group</strong>.
               </p>
               <p>
-                I'm currently focused on deepening my skills in <strong className="text-white/70">cloud infrastructure, automation, and DevOps engineering</strong>, with the goal of contributing to high-impact systems and scalable platforms.
+                I'm currently focused on deepening my skills in <strong className="text-white">cloud infrastructure, automation, and DevOps engineering</strong>, with the goal of contributing to high-impact systems and scalable platforms.
               </p>
             </div>
 
@@ -98,7 +103,7 @@ export default function About() {
               {['Python', 'Java', 'JavaScript', 'Docker', 'AWS', 'Git', 'MySQL', 'MongoDB'].map((tech) => (
                 <span
                   key={tech}
-                  className="px-4 py-2 rounded-xl glass-card text-sm text-white/60 hover:text-white hover:border-sky/30 cursor-default"
+                  className="px-4 py-2 rounded-xl glass-card text-sm text-white/75 hover:text-white hover:border-sky/30 cursor-default"
                 >
                   {tech}
                 </span>
@@ -117,7 +122,7 @@ export default function About() {
               <div className="text-3xl sm:text-4xl font-heading font-bold gradient-text mb-2">
                 <AnimatedCounter target={stat.value} suffix={stat.suffix} />
               </div>
-              <p className="text-sm text-white/40 group-hover:text-white/60">{stat.label}</p>
+              <p className="text-sm text-white/70 group-hover:text-white/90">{stat.label}</p>
             </div>
           ))}
         </div>

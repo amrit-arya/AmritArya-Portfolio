@@ -10,7 +10,11 @@ void main() {
 `
 
 const fragmentShaderSrc = `
-precision mediump float;
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+  precision highp float;
+#else
+  precision mediump float;
+#endif
 varying vec2 vUv;
 uniform float uTime;
 uniform vec3  uColor;
@@ -85,8 +89,13 @@ export default function Silk({
 
   useEffect(() => {
     const canvas = canvasRef.current
+    if (!canvas) return
     const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl')
     if (!gl) return
+
+    // Handle context loss gracefully
+    const handleContextLost = (e) => e.preventDefault()
+    canvas.addEventListener('webglcontextlost', handleContextLost, false)
 
     // Compile shaders
     const vert = compileShader(gl, gl.VERTEX_SHADER, vertexShaderSrc)
@@ -130,29 +139,62 @@ export default function Silk({
     gl.uniform1f(uRotation, rotation)
     gl.uniform1f(uNoise, noiseIntensity)
 
-    // Resize handler
+    // Resize handler: prevent reallocating canvas buffer on mobile address bar scroll
+    let curW = 0
+    let curH = 0
     const resize = () => {
-      canvas.width = window.innerWidth
-      canvas.height = window.innerHeight
-      gl.viewport(0, 0, canvas.width, canvas.height)
+      const newW = window.innerWidth
+      const newH = window.innerHeight
+      // Only resize if width changed or height changed significantly (ignoring ~100px mobile address bar shift)
+      if (curW !== newW || Math.abs(curH - newH) > 120) {
+        curW = newW
+        curH = newH
+        canvas.width = newW
+        canvas.height = newH
+        gl.viewport(0, 0, canvas.width, canvas.height)
+      }
     }
     resize()
     window.addEventListener('resize', resize)
 
-    // Render loop
-    let t = 0
+    // Render loop with time wrapping and visibility pausing
     let rafId
+    let isRunning = true
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
     const render = (ts) => {
-      t = ts * 0.001
+      if (!isRunning) return
+      // Wrap time with modulo to prevent float precision breakdown on mobile GPUs
+      const t = (ts * 0.001) % 1000.0
       gl.uniform1f(uTime, t)
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
-      rafId = requestAnimationFrame(render)
+
+      // If user prefers reduced motion, render single frame and don't loop
+      if (!prefersReducedMotion) {
+        rafId = requestAnimationFrame(render)
+      }
     }
     rafId = requestAnimationFrame(render)
 
+    const handleVisibility = () => {
+      if (document.hidden) {
+        isRunning = false
+        cancelAnimationFrame(rafId)
+      } else {
+        isRunning = true
+        if (!prefersReducedMotion) {
+          rafId = requestAnimationFrame(render)
+        }
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibility)
+
     return () => {
+      isRunning = false
       cancelAnimationFrame(rafId)
       window.removeEventListener('resize', resize)
+      document.removeEventListener('visibilitychange', handleVisibility)
+      canvas.removeEventListener('webglcontextlost', handleContextLost)
       gl.deleteProgram(program)
       gl.deleteShader(vert)
       gl.deleteShader(frag)

@@ -64,7 +64,12 @@ export default function Projects() {
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      ([entry]) => setIsVisible(entry.isIntersecting),
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true)
+          observer.unobserve(entry.target)
+        }
+      },
       { threshold: 0.1 }
     )
     if (sectionRef.current) observer.observe(sectionRef.current)
@@ -155,9 +160,11 @@ export default function Projects() {
                   {/* Links */}
                   <div className={`flex items-center gap-4 pt-4 border-t ${isBlack ? 'border-black/10' : 'border-white/5'}`}>
                     <a
-                      href="#"
+                      href={project.demoUrl || "https://github.com/amrit-arya"}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className={`flex items-center gap-2 text-sm transition-colors ${
-                        isBlack ? 'text-black/80 hover:text-black font-medium' : 'text-white/70 hover:text-sky'
+                        isBlack ? 'text-black/80 hover:text-black font-medium' : 'text-white/75 hover:text-sky'
                       }`}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -166,9 +173,11 @@ export default function Projects() {
                       Live Demo
                     </a>
                     <a
-                      href="#"
+                      href={project.sourceUrl || "https://github.com/amrit-arya"}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className={`flex items-center gap-2 text-sm transition-colors ${
-                        isBlack ? 'text-black/80 hover:text-black font-medium' : 'text-white/70 hover:text-lavender'
+                        isBlack ? 'text-black/80 hover:text-black font-medium' : 'text-white/75 hover:text-lavender'
                       }`}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">

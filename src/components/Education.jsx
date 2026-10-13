@@ -36,7 +36,12 @@ export default function Education() {
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      ([entry]) => setIsVisible(entry.isIntersecting),
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true)
+          observer.unobserve(entry.target)
+        }
+      },
       { threshold: 0.1 }
     )
     if (sectionRef.current) observer.observe(sectionRef.current)
@@ -51,7 +56,7 @@ export default function Education() {
       <div className="max-w-4xl mx-auto">
         {/* Section Header */}
         <div className={`text-center mb-20 ${isVisible ? 'animate-fade-in-up' : 'scroll-hidden'}`}>
-          <span className="text-sm font-semibold tracking-widest uppercase text-white/40">My Journey</span>
+          <span className="text-sm font-semibold tracking-widest uppercase text-white/70">My Journey</span>
           <h2 className="text-4xl sm:text-5xl font-heading font-bold mt-3">
             Education
           </h2>
@@ -79,7 +84,7 @@ export default function Education() {
                   <div className="h-px -mt-6 -mx-6 mb-5 bg-white/10" />
 
                   {/* Year badge */}
-                  <span className="inline-block px-3 py-1 rounded-lg text-xs font-semibold mb-3 bg-white/10 text-white/70">
+                  <span className="inline-block px-3 py-1 rounded-lg text-xs font-semibold mb-3 bg-white/10 text-white/80">
                     {item.year}
                   </span>
 
@@ -87,15 +92,15 @@ export default function Education() {
                     {item.degree}
                   </h3>
                   <p className="text-sm text-pink font-medium mb-1">{item.field}</p>
-                  <p className="text-sm text-white/40 mb-3">{item.institution}</p>
-                  <p className="text-sm text-white/50 leading-relaxed mb-4">{item.description}</p>
+                  <p className="text-sm text-white/70 mb-3">{item.institution}</p>
+                  <p className="text-sm text-white/75 leading-relaxed mb-4">{item.description}</p>
 
                   {/* GPA */}
                   <div className="flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-sky" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
                     </svg>
-                    <span className="text-sm text-white/60 font-medium">GPA: {item.gpa}</span>
+                    <span className="text-sm text-white/80 font-medium">GPA: {item.gpa}</span>
                   </div>
                 </div>
               </div>

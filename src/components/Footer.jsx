@@ -6,7 +6,12 @@ export default function Footer() {
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      ([entry]) => setIsVisible(entry.isIntersecting),
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true)
+          observer.unobserve(entry.target)
+        }
+      },
       { threshold: 0.2 }
     )
     if (ref.current) observer.observe(ref.current)
@@ -28,13 +33,13 @@ export default function Footer() {
             </span>
           </div>
 
-          {/* Links */}
-          <div className="flex items-center gap-6">
+          {/* Links — flex-wrap prevents overflow on small screens */}
+          <div className="flex items-center flex-wrap justify-center gap-x-6 gap-y-2">
             {['Home', 'About', 'Education', 'Projects', 'Skills', 'Contact'].map((link) => (
               <a
                 key={link}
                 href={`#${link.toLowerCase()}`}
-                className="text-sm text-white/30 hover:text-white/70 transition-colors"
+                className="text-sm text-white/60 hover:text-white/90 transition-colors"
               >
                 {link}
               </a>
@@ -42,11 +47,11 @@ export default function Footer() {
           </div>
 
           {/* Copyright */}
-          <p className="text-sm text-white/20">
+          <p className="text-sm text-white/50">
             © {new Date().getFullYear()} Amrit Arya
           </p>
         </div>
       </div>
     </footer>
   )
-}
+}

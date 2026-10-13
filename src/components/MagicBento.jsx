@@ -114,15 +114,8 @@ export const ParticleCard = ({
     magnetismAnimationRef.current?.kill();
 
     particlesRef.current.forEach(particle => {
-      gsap.to(particle, {
-        scale: 0,
-        opacity: 0,
-        duration: 0.3,
-        ease: 'back.in(1.7)',
-        onComplete: () => {
-          particle.parentNode?.removeChild(particle);
-        }
-      });
+      gsap.killTweensOf(particle);
+      particle.parentNode?.removeChild(particle);
     });
     particlesRef.current = [];
   }, []);
@@ -173,6 +166,9 @@ export const ParticleCard = ({
     const element = cardRef.current;
 
     const handleMouseEnter = () => {
+      // Don't spawn hover particles or tilt on mobile/touch screens
+      if (typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches) return;
+
       isHoveredRef.current = true;
       animateParticles();
 
@@ -329,6 +325,9 @@ export const GlobalSpotlight = ({
   useEffect(() => {
     if (disableAnimations || !gridRef?.current || !enabled) return;
 
+    // Skip spotlight on coarse touch devices
+    if (typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches) return;
+
     const spotlight = document.createElement('div');
     spotlight.className = 'global-spotlight';
     spotlight.style.cssText = `
@@ -345,7 +344,7 @@ export const GlobalSpotlight = ({
         rgba(${glowColor}, 0.01) 65%,
         transparent 70%
       );
-      z-index: 200;
+      z-index: 20;
       opacity: 0;
       transform: translate(-50%, -50%);
       mix-blend-mode: screen;
@@ -353,9 +352,14 @@ export const GlobalSpotlight = ({
     document.body.appendChild(spotlight);
     spotlightRef.current = spotlight;
 
-    const handleMouseMove = e => {
-      if (!spotlightRef.current || !gridRef.current) return;
+    let rafId = null;
+    let latestEvent = null;
 
+    const processMove = () => {
+      rafId = null;
+      if (!spotlightRef.current || !gridRef.current || !latestEvent) return;
+
+      const e = latestEvent;
       const section = gridRef.current.closest('.bento-section');
       const rect = section?.getBoundingClientRect();
       const mouseInside =
@@ -421,7 +425,18 @@ export const GlobalSpotlight = ({
       });
     };
 
+    const handleMouseMove = e => {
+      latestEvent = e;
+      if (!rafId) {
+        rafId = requestAnimationFrame(processMove);
+      }
+    };
+
     const handleMouseLeave = () => {
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
       isInsideSection.current = false;
       gridRef.current?.querySelectorAll('.card').forEach(card => {
         card.style.setProperty('--glow-intensity', '0');
@@ -435,10 +450,11 @@ export const GlobalSpotlight = ({
       }
     };
 
-    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mousemove', handleMouseMove, { passive: true });
     document.addEventListener('mouseleave', handleMouseLeave);
 
     return () => {
+      if (rafId) cancelAnimationFrame(rafId);
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseleave', handleMouseLeave);
       spotlightRef.current?.parentNode?.removeChild(spotlightRef.current);

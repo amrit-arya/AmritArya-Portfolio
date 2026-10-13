@@ -17,9 +17,16 @@ const EXIT_MS = 100
 
 export default function Hero() {
   const [index, setIndex] = useState(0)
-  const [phase, setPhase] = useState('entering')
+  const [phase, setPhase] = useState('visible')
 
   useEffect(() => {
+    // Respect prefers-reduced-motion: stay static on index 0
+    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setIndex(0)
+      setPhase('visible')
+      return
+    }
+
     let timer
     if (phase === 'entering') {
       timer = setTimeout(() => setPhase('visible'), ENTER_MS)
@@ -50,7 +57,7 @@ export default function Hero() {
   }
 
   return (
-    <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <section id="home" className="relative min-h-[100dvh] min-h-svh flex items-center justify-center overflow-hidden">
       {/* ── Content ── */}
       <div className="relative z-10 text-center px-6 max-w-5xl mx-auto">
 
@@ -64,20 +71,22 @@ export default function Hero() {
 
         {/* Animated Name */}
         <div className="animate-fade-in-up mb-12" style={{ animationDelay: '0.4s', opacity: 0 }}>
-          <div style={{ overflow: 'hidden', padding: '0.35em 0.2em', minHeight: '1.6em' }}>
+          <div style={{ overflow: 'hidden', padding: '0.35em 0.2em', height: 'clamp(70px, 12vw, 120px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <h1
+              aria-label="Amrit Arya"
               style={{
-                fontSize: index === 0 ? 'clamp(52px, 9vw, 92px)' : 'clamp(44px, 8.5vw, 84px)',
-                lineHeight: '1.25',
+                fontSize: index === 0 ? 'clamp(46px, 8.5vw, 88px)' : 'clamp(36px, 7vw, 76px)',
+                lineHeight: '1.2',
                 fontFamily: index === 0 ? 'MickeyMouse, sans-serif' : 'Monograph, sans-serif',
                 color: '#ffffff',
                 fontWeight: index === 0 ? 'normal' : 'bold',
                 display: 'block',
+                whiteSpace: 'nowrap',
                 willChange: 'transform, opacity, filter',
                 ...nameStyle,
               }}
             >
-              {current.name}
+              <span aria-hidden="true">{current.name}</span>
             </h1>
           </div>
         </div>

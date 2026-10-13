@@ -106,7 +106,11 @@ export function SmoothCursor({
       const nextIsEnabled = mediaQuery.matches
       setIsEnabled(nextIsEnabled)
 
-      if (!nextIsEnabled) {
+      // Toggle class so CSS cursor:none only applies when custom cursor is active
+      if (nextIsEnabled) {
+        document.documentElement.classList.add('custom-cursor-active')
+      } else {
+        document.documentElement.classList.remove('custom-cursor-active')
         setIsVisible(false)
       }
     }
@@ -116,6 +120,7 @@ export function SmoothCursor({
 
     return () => {
       mediaQuery.removeEventListener("change", updateEnabled)
+      document.documentElement.classList.remove('custom-cursor-active')
     }
   }, [])
 

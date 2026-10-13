@@ -10,6 +10,7 @@
   src: url('/LacheyardScript.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
@@ -17,6 +18,7 @@
   src: url('/Monograph.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
@@ -24,6 +26,7 @@
   src: url('/Herkey.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
@@ -31,6 +34,7 @@
   src: url('/MickeyMouse.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
+  font-display: swap;
 }
 
 @theme {
@@ -50,8 +54,23 @@ html {
   scroll-behavior: smooth;
 }
 
-* {
+/* Custom cursor — only active when JS adds the class on non-touch devices */
+html.custom-cursor-active * {
   cursor: none !important;
+}
+
+html.custom-cursor-active input,
+html.custom-cursor-active textarea,
+html.custom-cursor-active [contenteditable] {
+  cursor: text !important;
+}
+
+html.custom-cursor-active a,
+html.custom-cursor-active button,
+html.custom-cursor-active [role="button"],
+html.custom-cursor-active [role="slider"],
+html.custom-cursor-active select {
+  cursor: pointer !important;
 }
 
 body {
@@ -338,7 +357,23 @@ section {
 input:focus,
 textarea:focus {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.4);
+}
+
+/* Visible focus ring for keyboard navigation */
+:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.7);
+  outline-offset: 2px;
+}
+
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* Music Carousel Animations */
