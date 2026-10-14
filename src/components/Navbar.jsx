@@ -14,32 +14,73 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [activeSection, setActiveSection] = useState('home')
 
+  // Dynamic scroll spy with rAF and support for lazy-loaded sections (e.g. Skills)
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50)
-    }
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+    let rafId = null
 
-  useEffect(() => {
-    const observers = []
-    navLinks.forEach(({ id }) => {
-      const el = document.getElementById(id)
-      if (!el) return
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) setActiveSection(id)
-        },
-        { threshold: 0, rootMargin: '-40% 0px -60% 0px' }
-      )
-      observer.observe(el)
-      observers.push(observer)
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 30)
+
+      if (rafId) return
+      rafId = requestAnimationFrame(() => {
+        rafId = null
+
+        // If user is at or near the bottom of the page, activate Contact
+        const isNearBottom =
+          window.innerHeight + window.scrollY >=
+          document.documentElement.scrollHeight - 70
+
+        if (isNearBottom) {
+          setActiveSection('contact')
+          return
+        }
+
+        // If user is at top of page, activate Home
+        if (window.scrollY < 120) {
+          setActiveSection('home')
+          return
+        }
+
+        // Reference line at ~35% of the viewport height (natural reading eye level)
+        const focalLine = window.innerHeight * 0.35
+        let current = 'home'
+
+        for (const { id } of navLinks) {
+          const el = document.getElementById(id)
+          if (!el) continue
+          const rect = el.getBoundingClientRect()
+          // If section's top has crossed the focal line, it is the current candidate
+          if (rect.top <= focalLine) {
+            current = id
+          }
+        }
+
+        setActiveSection(current)
+      })
+    }
+
+    // Initial check
+    handleScroll()
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    window.addEventListener('resize', handleScroll, { passive: true })
+
+    // Observe DOM changes so lazy-loaded components (like Skills) are detected immediately upon render
+    const observer = new MutationObserver(() => {
+      handleScroll()
     })
-    return () => observers.forEach(o => o.disconnect())
+    observer.observe(document.body, { childList: true, subtree: true })
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      window.removeEventListener('resize', handleScroll)
+      observer.disconnect()
+      if (rafId) cancelAnimationFrame(rafId)
+    }
   }, [])
 
   const scrollTo = (id) => {
+    setActiveSection(id)
     const el = document.getElementById(id)
     if (el) el.scrollIntoView({ behavior: 'smooth' })
     setIsOpen(false)
